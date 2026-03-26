@@ -17,4 +17,4 @@ A full-stack Web3 application built on Ethereum enabling cross-brand loyalty poi
 - Blockchain-transparent transactions
 - MetaMask wallet integration
 - Live Etherscan verification
-- 
+  
