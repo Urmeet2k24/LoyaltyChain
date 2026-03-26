@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LoyaltyChain — Blockchain Rewards Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f4f6fb;--white:#ffffff;--sidebar:#0f1729;
+  --primary:#2455f5;--primary-light:#eef1fe;--primary-dark:#1a3fd4;
+  --ink:#0d1530;--ink2:#4a5578;--ink3:#9aa3be;
+  --border:#e3e8f4;--border2:#d0d7ed;
+  --green:#00b87a;--green-bg:#e8faf4;
+  --red:#f03e3e;--red-bg:#fff0f0;
+  --amber:#f59f00;--amber-bg:#fff8e1;
+  --shadow:0 1px 3px rgba(13,21,48,0.06),0 4px 16px rgba(13,21,48,0.04);
+  --shadow2:0 2px 8px rgba(13,21,48,0.1),0 8px 32px rgba(13,21,48,0.08);
+  --display:'Cabinet Grotesk',sans-serif;
+  --body:'Outfit',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --r:10px;--r2:14px;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* ── SIDEBAR ── */
+aside{position:fixed;left:0;top:0;bottom:0;width:232px;background:var(--sidebar);display:flex;flex-direction:column;z-index:50}
+.sb-logo{display:flex;align-items:center;gap:11px;padding:22px 22px 18px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.sb-logo-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#2455f5,#6c8fff);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 12px rgba(36,85,245,0.4)}
+.sb-logo-text{font-family:var(--display);font-weight:800;font-size:17px;color:#fff;letter-spacing:-.3px}
+.sb-logo-text span{color:#6c8fff}
+.sb-section{padding:20px 12px 6px;font-family:var(--mono);font-size:10px;letter-spacing:1.8px;color:rgba(255,255,255,0.25);text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:1px 8px;border-radius:8px;color:rgba(255,255,255,0.55);font-size:13.5px;font-weight:500;cursor:pointer;transition:.15s;border:1px solid transparent}
+.sb-item:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)}
+.sb-item.on{background:rgba(36,85,245,0.25);color:#fff;border-color:rgba(36,85,245,0.4)}
+.sb-item.on .sb-ic{color:#6c8fff}
+.sb-ic{font-size:15px;width:20px;text-align:center}
+.sb-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,0.07)}
+.net-status{display:flex;align-items:center;gap:8px;background:rgba(0,184,122,0.12);border:1px solid rgba(0,184,122,0.25);border-radius:8px;padding:9px 12px}
+.ndot{width:7px;height:7px;border-radius:50%;background:#00b87a;box-shadow:0 0 8px #00b87a;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.net-label{font-family:var(--mono);font-size:11px;color:#00b87a}
+
+/* ── MAIN ── */
+.main{margin-left:232px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px;background:rgba(244,246,251,0.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.tb-title{font-family:var(--display);font-weight:700;font-size:16px;color:var(--ink)}
+.tb-right{display:flex;align-items:center;gap:12px}
+.w-chip{display:flex;align-items:center;gap:7px;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-family:var(--mono);font-size:11px;color:var(--ink2);box-shadow:var(--shadow)}
+.wdot{width:7px;height:7px;border-radius:50%;background:var(--border2)}
+.wdot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+#btn-connect{display:flex;align-items:center;gap:7px;background:var(--primary);color:#fff;font-family:var(--display);font-weight:700;font-size:13px;padding:9px 20px;border:none;border-radius:8px;cursor:pointer;transition:.18s;box-shadow:0 4px 14px rgba(36,85,245,0.3)}
+#btn-connect:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 20px rgba(36,85,245,0.45)}
+#btn-connect.linked{background:var(--primary-light);color:var(--primary);box-shadow:none;border:1px solid rgba(36,85,245,0.2)}
+.body{flex:1;padding:28px 32px}
+.pg{display:none;animation:up .25s ease}.pg.on{display:block}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── PAGE TITLE ── */
+.pt-tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--primary);background:var(--primary-light);padding:3px 10px;border-radius:4px;margin-bottom:8px;text-transform:uppercase}
+.pt-h{font-family:var(--display);font-weight:900;font-size:28px;letter-spacing:-.8px;color:var(--ink);line-height:1.1}
+.pt-sub{color:var(--ink3);font-size:13.5px;margin-top:5px;margin-bottom:24px}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.sc{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:20px 22px;box-shadow:var(--shadow);transition:.18s;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--primary);border-radius:2px 0 0 2px}
+.sc:hover{box-shadow:var(--shadow2);transform:translateY(-2px)}
+.sc-icon{font-size:20px;margin-bottom:10px}
+.sc-label{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink3);margin-bottom:6px}
+.sc-val{font-family:var(--display);font-weight:800;font-size:26px;color:var(--ink);letter-spacing:-.5px}
+.sc-note{font-size:12px;color:var(--ink3);margin-top:4px}
+
+/* ── CARD ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:24px 26px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.ch-left{display:flex;align-items:center;gap:10px}
+.ch-icon{width:34px;height:34px;border-radius:8px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:15px}
+.ch-title{font-family:var(--display);font-weight:700;font-size:15px;color:var(--ink)}
+.ch-sub{font-size:12px;color:var(--ink3);margin-top:1px}
+
+/* ── BRAND CARDS ── */
+.brands-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:6px}
+.brand-card{
+  background:var(--white);border:2px solid var(--border);
+  border-radius:var(--r2);padding:16px 12px;text-align:center;
+  cursor:pointer;transition:.2s;position:relative;
+}
+.brand-card:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(36,85,245,0.12);transform:translateY(-2px)}
+.brand-card.selected{border-color:var(--primary);background:var(--primary-light);box-shadow:0 4px 16px rgba(36,85,245,0.18)}
+.brand-card.selected::after{content:'✓';position:absolute;top:6px;right:8px;font-size:11px;color:var(--primary);font-weight:700}
+.brand-logo{width:48px;height:48px;border-radius:12px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.brand-name{font-family:var(--display);font-weight:700;font-size:13px;color:var(--ink);margin-bottom:3px}
+.brand-pts{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.brand-pts.has-pts{color:var(--primary);font-weight:500}
+
+/* ── SWAP UI ── */
+.swap-ui{background:linear-gradient(135deg,#f0f4ff,#f8f5ff);border:1.5px solid rgba(36,85,245,0.15);border-radius:var(--r2);padding:24px}
+.swap-row{display:flex;align-items:center;gap:16px}
+.swap-side{flex:1;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r2);padding:18px}
+.swap-side-label{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink3);margin-bottom:12px}
+.swap-brand-select{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;padding:10px;background:#f8f9fc;border-radius:8px;border:1px solid var(--border);transition:.15s}
+.swap-brand-select:hover{border-color:var(--primary);background:var(--primary-light)}
+.swap-brand-logo{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:700;flex-shrink:0}
+.swap-brand-name{font-family:var(--display);font-weight:700;font-size:14px}
+.swap-brand-id{font-family:var(--mono);font-size:10px;color:var(--ink3)}
+.swap-amount-input{width:100%;background:transparent;border:none;font-family:var(--display);font-weight:800;font-size:28px;color:var(--ink);outline:none;letter-spacing:-1px}
+.swap-amount-input::placeholder{color:var(--border2)}
+.swap-inr{font-size:12px;color:var(--ink3);margin-top:4px;font-family:var(--mono)}
+.swap-arrow-btn{width:44px;height:44px;border-radius:50%;background:var(--white);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;transition:.2s;box-shadow:var(--shadow)}
+.swap-arrow-btn:hover{border-color:var(--primary);color:var(--primary);transform:rotate(180deg)}
+.swap-rate-bar{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:12px 16px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:13px}
+.srb-label{color:var(--ink2);font-size:12px}
+.srb-val{font-family:var(--mono);font-weight:500;color:var(--primary)}
+
+/* ── TX RECEIPT MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(13,21,48,0.5);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:up .2s ease}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--white);border-radius:20px;padding:32px;width:460px;max-width:94vw;box-shadow:0 24px 64px rgba(13,21,48,0.2);position:relative}
+.modal-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--ink2)}
+.modal-icon{width:56px;height:56px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
+.modal-title{font-family:var(--display);font-weight:800;font-size:20px;text-align:center;color:var(--ink);margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--ink3);text-align:center;margin-bottom:20px}
+.tx-detail{background:#f8f9fc;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.tx-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.tx-row:last-child{border-bottom:none}
+.tx-key{font-size:12px;color:var(--ink3);font-weight:500}
+.tx-val{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx-val.green{color:var(--green);font-weight:600}
+.tx-val.blue{color:var(--primary)}
+.tx-transfer{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.tx-addr-box{flex:1;background:#f8f9fc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center}
+.tx-addr-label{font-size:10px;color:var(--ink3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--mono)}
+.tx-addr-val{font-family:var(--mono);font-size:11px;color:var(--ink2)}
+.tx-arrow{font-size:20px;color:var(--ink3);flex-shrink:0}
+.etherscan-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:var(--primary-light);border:1px solid rgba(36,85,245,0.2);border-radius:8px;color:var(--primary);font-family:var(--display);font-weight:700;font-size:13px;cursor:pointer;text-decoration:none;transition:.15s}
+.etherscan-btn:hover{background:var(--primary);color:#fff}
+
+/* ── FORM ── */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px}
+input,select{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--ink);font-size:13.5px;font-family:var(--body);outline:none;transition:.18s}
+input::placeholder{color:var(--ink3)}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(36,85,245,0.1)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border:none;border-radius:8px;font-family:var(--display);font-weight:700;font-size:13px;cursor:pointer;transition:.18s}
+.btn:active{transform:scale(.98)}
+.bp{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(36,85,245,0.28)}
+.bp:hover{background:var(--primary-dark);transform:translateY(-1px)}
+.bo{background:transparent;color:var(--primary);border:1.5px solid rgba(36,85,245,0.3)}
+.bo:hover{background:var(--primary-light)}
+.bg{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(0,184,122,0.28)}
+.bg:hover{background:#00a36c;transform:translateY(-1px)}
+.bsm{padding:7px 16px;font-size:12px}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl thead tr{background:#f8f9fc}
+.tbl th{text-align:left;padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink3);border-bottom:1px solid var(--border)}
+.tbl td{padding:13px 16px;border-bottom:1px solid var(--border)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover{background:#f8f9fc}
+.pts-val{font-family:var(--display);font-weight:800;font-size:17px;color:var(--primary)}
+.pts-inr{font-size:11px;color:var(--green);font-family:var(--mono)}
+.mono-txt{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:5px;font-size:11px;font-weight:600}
+.bon{background:var(--green-bg);color:var(--green)}
+.boff{background:var(--red-bg);color:var(--red)}
+.bid{background:var(--primary-light);color:var(--primary);font-family:var(--mono)}
+
+/* ── LOG ── */
+.loglist{display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto}
+.logitem{display:flex;align-items:center;gap:12px;border:1px solid var(--border);border-radius:8px;padding:11px 16px;font-size:13px;background:var(--white);transition:.12s}
+.logitem:hover{background:#f8f9fc}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.le{background:var(--green)}.lr{background:var(--red)}.ls{background:#7c3aed}.lb{background:var(--primary)}
+.ltime{font-family:var(--mono);font-size:10px;color:var(--ink3);margin-left:auto}
+.ltx{font-family:var(--mono);font-size:10px;color:var(--primary);margin-left:8px;cursor:pointer;text-decoration:underline}
+
+/* ── INFOBOX ── */
+.infobox{display:flex;gap:14px;background:#fffbeb;border:1px solid rgba(245,159,0,0.25);border-radius:var(--r);padding:16px 18px;margin-top:16px}
+.infobox p{font-size:13px;color:#92400e;line-height:1.75}
+code{font-family:var(--mono);font-size:12px;background:rgba(36,85,245,0.08);color:var(--primary);padding:2px 7px;border-radius:4px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px 24px}
+.empty-icon{font-size:36px;margin-bottom:10px;opacity:.3}
+.empty-text{font-size:14px;color:var(--ink3)}
+hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+
+/* ── TOAST ── */
+#toasts{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.toast{display:flex;align-items:center;gap:10px;background:var(--ink);color:#fff;border-radius:10px;padding:13px 18px;font-size:13px;min-width:240px;max-width:360px;box-shadow:0 8px 32px rgba(13,21,48,0.2);animation:up .22s ease;transition:opacity .35s}
+.tok{border-left:3px solid var(--green)}.terr{border-left:3px solid var(--red)}.tinf{border-left:3px solid #6c8fff}
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--sidebar);border-top:1px solid rgba(255,255,255,0.08);padding:8px 0 12px}
+.mobile-nav-items{display:flex;justify-content:space-around;align-items:center}
+.mn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.45);font-size:10px;font-family:var(--body);font-weight:500;transition:.15s;min-width:52px}
+.mn-item.on{color:#6c8fff}
+.mn-ic{font-size:20px;line-height:1}
+
+@media(max-width:768px){
+  /* Hide desktop sidebar */
+  aside{display:none}
+  /* Show mobile bottom nav */
+  .mobile-nav{display:block}
+  /* Main layout */
+  .main{margin-left:0;padding-bottom:72px}
+  /* Topbar */
+  .topbar{padding:0 16px;height:56px}
+  .tb-title{font-size:15px}
+  .w-chip{display:none}
+  #btn-connect{padding:7px 14px;font-size:12px}
+  /* Body padding */
+  .body{padding:16px}
+  /* Stats grid — 2 columns on mobile */
+  .stats{grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .sc{padding:14px 16px}
+  .sc-val{font-size:20px}
+  .sc-icon{font-size:16px;margin-bottom:6px}
+  /* Cards */
+  .card{padding:16px;margin-bottom:14px}
+  .card-head{margin-bottom:14px;padding-bottom:12px}
+  /* Brand grid — 3 columns on mobile */
+  .brands-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .brand-card{padding:12px 8px}
+  .brand-logo{width:38px;height:38px;font-size:18px;margin-bottom:6px}
+  .brand-name{font-size:11px}
+  /* Forms */
+  .r2,.r3{grid-template-columns:1fr}
+  /* Swap UI */
+  .swap-row{flex-direction:column;gap:8px}
+  .swap-ui{padding:14px}
+  .swap-side{padding:14px}
+  .swap-amount-input{font-size:22px}
+  .swap-arrow-btn{width:36px;height:36px;font-size:14px;align-self:center}
+  .spbig{font-size:24px}
+  /* Page titles */
+  .pt-h{font-size:22px;letter-spacing:-.5px}
+  .pt-sub{font-size:13px}
+  /* Table — scrollable */
+  .card{overflow-x:auto}
+  .tbl{min-width:500px}
+  /* Modal */
+  .modal{padding:20px;border-radius:16px}
+  .modal-title{font-size:17px}
+  .tx-row{flex-direction:column;gap:2px;padding:8px 0}
+  .tx-val{text-align:left;max-width:100%}
+  /* Buttons */
+  .btn{font-size:12px;padding:10px 18px}
+  /* Swap rate bar */
+  .swap-rate-bar{flex-direction:column;gap:4px;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ TX RECEIPT MODAL ════════ -->
+<div class="modal-overlay hidden" id="tx-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="modal-icon">✓</div>
+    <div class="modal-title" id="modal-title">Transaction Successful!</div>
+    <div class="modal-sub" id="modal-sub">Your transaction has been confirmed on the blockchain</div>
+    <div class="tx-transfer">
+      <div class="tx-addr-box"><div class="tx-addr-label">From</div><div class="tx-addr-val" id="modal-from">—</div></div>
+      <div class="tx-arrow">→</div>
+      <div class="tx-addr-box"><div class="tx-addr-label">To / Contract</div><div class="tx-addr-val" id="modal-to">—</div></div>
+    </div>
+    <div class="tx-detail">
+      <div class="tx-row"><span class="tx-key">Transaction Hash</span><span class="tx-val blue" id="modal-hash">—</span></div>
+      <div class="tx-row"><span class="tx-key">Action</span><span class="tx-val green" id="modal-action">—</span></div>
+      <div class="tx-row"><span class="tx-key">Points</span><span class="tx-val green" id="modal-points">—</span></div>
+      <div class="tx-row"><span class="tx-key">Worth (approx)</span><span class="tx-val" id="modal-worth">—</span></div>
+      <div class="tx-row"><span class="tx-key">Network</span><span class="tx-val">Sepolia Testnet</span></div>
+      <div class="tx-row"><span class="tx-key">Status</span><span class="tx-val green">✓ Confirmed</span></div>
+    </div>
+    <a class="etherscan-btn" id="etherscan-link" href="#" target="_blank">🔍 View on Sepolia Etherscan</a>
+  </div>
+</div>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside>
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🔗</div>
+    <div class="sb-logo-text">Loyalty<span>Chain</span></div>
+  </div>
+  <div class="sb-section">Overview</div>
+  <div class="sb-item on" onclick="go('dashboard')"><span class="sb-ic">▣</span>Dashboard</div>
+  <div class="sb-item" onclick="go('brands')"><span class="sb-ic">⬡</span>Brands</div>
+  <div class="sb-section">Actions</div>
+  <div class="sb-item" onclick="go('earn')"><span class="sb-ic">✦</span>Earn Points</div>
+  <div class="sb-item" onclick="go('redeem')"><span class="sb-ic">◎</span>Redeem Points</div>
+  <div class="sb-item" onclick="go('swap')"><span class="sb-ic">⇌</span>Swap Points</div>
+  <div class="sb-section">System</div>
+  <div class="sb-item" onclick="go('admin')"><span class="sb-ic">⚙</span>Admin</div>
+  <div class="sb-item" onclick="go('logs')"><span class="sb-ic">≡</span>Activity Log</div>
+  <div class="sb-bottom">
+    <div class="net-status"><span class="ndot"></span><span class="net-label">Sepolia Testnet</span></div>
+  </div>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-title" id="tb-title">Dashboard</div>
+    <div class="tb-right">
+      <div class="w-chip"><span class="wdot" id="wdot"></span><span id="w-short">Not connected</span></div>
+      <button id="btn-connect">Connect Wallet</button>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="pg on" id="p-dashboard">
+      <div class="pt-tag">Overview</div>
+      <div class="pt-h">Welcome to LoyaltyChain 👋</div>
+      <div class="pt-sub">Your blockchain-backed loyalty points across all brands — fully on-chain, fully yours.</div>
+
+      <div class="stats">
+        <div class="sc"><div class="sc-icon">⬡</div><div class="sc-label">Total Brands</div><div class="sc-val" id="st-brands">—</div><div class="sc-note">On the network</div></div>
+        <div class="sc"><div class="sc-icon">💰</div><div class="sc-label">Your Wallet</div><div class="sc-val" id="st-addr" style="font-size:13px;padding-top:6px;font-family:var(--mono);font-weight:600">—</div><div class="sc-note">MetaMask address</div></div>
+        <div class="sc"><div class="sc-icon">🌐</div><div class="sc-label">Network</div><div class="sc-val" style="color:var(--green);font-size:18px;padding-top:4px">Sepolia</div><div class="sc-note">Ethereum testnet</div></div>
+        <div class="sc"><div class="sc-icon">💱</div><div class="sc-label">1 Point Worth</div><div class="sc-val" style="font-size:18px;padding-top:4px;color:var(--amber)">₹1.00</div><div class="sc-note">Redeemable value</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="ch-left"><div class="ch-icon">💰</div><div><div class="ch-title">My Points Balance</div><div class="ch-sub">Live from the blockchain</div></div></div>
+          <button class="btn bo bsm" onclick="loadPoints()">↻ Refresh</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Brand</th><th>Points</th><th>Worth (₹)</th><th>Expires</th><th>Status</th></tr></thead>
+          <tbody id="dash-body"><tr><td colspan="5"><div class="empty"><div class="empty-icon">🔌</div><div class="empty-text">Connect your MetaMask wallet to view balances</div></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── BRANDS ── -->
+    <div class="pg" id="p-brands">
+      <div class="pt-tag">Registry</div>
+      <div class="pt-h">Brand Network</div>
+      <div class="pt-sub">All brands on the LoyaltyChain protocol. Click a brand card to see details.</div>
+
+      <div class="card">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">⬡</div><div><div class="ch-title">Live Brand Directory</div><div class="ch-sub">Registered on-chain</div></div></div><button class="btn bo bsm" onclick="loadBrands()">↻ Refresh</button></div>
+        <div class="brands-grid" id="brands-grid">
+          <div style="grid-column:1/-1"><div class="empty"><div class="empty-icon">⬡</div><div class="empty-text">Connect wallet & refresh</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">➕</div><div><div class="ch-title">Register New Brand</div><div class="ch-sub">Add your brand to the network</div></div></div></div>
+        <div class="fg"><label>Brand Name</label><input id="bn" placeholder="e.g. Myntra, Flipkart, Meesho…"/></div>
+        <button class="btn bp" onclick="regBrand()">Register Brand</button>
+      </div>
+    </div>
+
+    <!-- ── EARN ── -->
+    <div class="pg" id="p-earn">
+      <div class="pt-tag">Brand Action</div>
+      <div class="pt-h">Earn Points</div>
+      <div class="pt-sub">Select a brand and mint loyalty points to a customer's wallet.</div>
+
+      <div class="card">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">✦</div><div><div class="ch-title">Select Brand</div><div class="ch-sub">Only the brand owner can mint points</div></div></div></div>
+        <div class="brands-grid" id="earn-brands-grid">
+          <div style="grid-column:1/-1;color:var(--ink3);font-size:13px;padding:12px 0">Connect wallet to see brands</div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+        <div class="r2">
+          <div class="fg"><label>Customer Wallet Address</label><input id="e-user" placeholder="0x…"/></div>
+          <div class="fg"><label>Points Amount</label><input id="e-amt" type="number" placeholder="500" min="1" oninput="updateInrPreview('e-amt','e-inr-preview')"/></div>
+        </div>
+        <div id="e-inr-preview" style="font-family:var(--mono);font-size:12px;color:var(--green);margin-bottom:12px;display:none"></div>
+        <div class="fg"><label>Validity in Days <span style="color:var(--ink3);font-weight:400">(0 = never expires)</span></label><input id="e-days" type="number" placeholder="30" min="0" style="max-width:200px"/></div>
+        <button class="btn bp" onclick="earnPts()">✦ Mint Points On-Chain</button>
+      </div>
+    </div>
+
+    <!-- ── REDEEM ── -->
+    <div class="pg" id="p-redeem">
+      <div class="pt-tag">User Action</div>
+      <div class="pt-h">Redeem Points</div>
+      <div class="pt-sub">Select a brand and burn your loyalty points to claim rewards.</div>
+
+      <div class="card">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">🎁</div><div><div class="ch-title">Select Brand to Redeem From</div><div class="ch-sub">Points are permanently burned on redemption</div></div></div></div>
+        <div class="brands-grid" id="redeem-brands-grid">
+          <div style="grid-column:1/-1;color:var(--ink3);font-size:13px;padding:12px 0">Connect wallet to see brands</div>
+        </div>
+        <div style="height:1px;background:var(--border);margin:20px 0"></div>
+        <div class="fg" style="max-width:260px"><label>Amount to Redeem</label><input id="r-amt" type="number" placeholder="100" min="1" oninput="updateInrPreview('r-amt','r-inr-preview')"/></div>
+        <div id="r-inr-preview" style="font-family:var(--mono);font-size:12px;color:var(--green);margin-bottom:12px;display:none"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn bg" onclick="redeemPts()">Redeem Points</button>
+          <button class="btn bo bsm" onclick="checkBal()">Check My Balance</button>
+        </div>
+        <div id="r-bal-txt" style="margin-top:14px;font-size:13px;color:var(--ink2)"></div>
+      </div>
+    </div>
+
+    <!-- ── SWAP ── -->
+    <div class="pg" id="p-swap">
+      <div class="pt-tag">Core Feature</div>
+      <div class="pt-h">Swap Points</div>
+      <div class="pt-sub">Exchange loyalty points across brands — transparent, instant, on-chain.</div>
+
+      <div class="card">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">⇌</div><div><div class="ch-title">Cross-Brand Exchange</div><div class="ch-sub">Like a crypto exchange — but for loyalty points</div></div></div></div>
+
+        <div class="swap-ui">
+          <div class="swap-row">
+            <!-- FROM -->
+            <div class="swap-side">
+              <div class="swap-side-label">You Give</div>
+              <div class="swap-brand-select" id="swap-from-display" onclick="openBrandPicker('from')">
+                <div class="swap-brand-logo" id="sfrom-logo" style="background:#e3e8f4">?</div>
+                <div><div class="swap-brand-name" id="sfrom-name">Select Brand</div><div class="swap-brand-id" id="sfrom-id">Click to choose</div></div>
+              </div>
+              <input class="swap-amount-input" id="s-amt" type="number" placeholder="0" oninput="prevSwap()"/>
+              <div class="swap-inr" id="s-from-inr">≈ ₹0.00</div>
+            </div>
+            <!-- ARROW -->
+            <div class="swap-arrow-btn" onclick="flipSwap()">⇌</div>
+            <!-- TO -->
+            <div class="swap-side">
+              <div class="swap-side-label">You Receive</div>
+              <div class="swap-brand-select" id="swap-to-display" onclick="openBrandPicker('to')">
+                <div class="swap-brand-logo" id="sto-logo" style="background:#e3e8f4">?</div>
+                <div><div class="swap-brand-name" id="sto-name">Select Brand</div><div class="swap-brand-id" id="sto-id">Click to choose</div></div>
+              </div>
+              <div style="font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:-1px;color:var(--green)" id="s-out-big">0</div>
+              <div class="swap-inr" id="s-to-inr">≈ ₹0.00</div>
+            </div>
+          </div>
+          <div class="swap-rate-bar">
+            <span class="srb-label">Exchange Rate</span>
+            <span class="srb-val" id="swap-rate-display">Select brands to see rate</span>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <button class="btn bp" style="width:100%;justify-content:center;padding:13px" onclick="swapPts()">⇌ Execute Swap on Blockchain</button>
+        </div>
+      </div>
+
+      <div class="infobox">
+        <div style="font-size:18px">💡</div>
+        <p>Today 500 Paytm coins and 300 Nykaa credits are <strong>siloed forever</strong> — expiring unused. LoyaltyChain enables trustless cross-brand swaps at transparent on-chain rates. No hidden fees. Every swap is publicly verifiable on <strong>Sepolia Etherscan.</strong></p>
+      </div>
+    </div>
+
+    <!-- ── ADMIN ── -->
+    <div class="pg" id="p-admin">
+      <div class="pt-tag">Platform Controls</div>
+      <div class="pt-h">Admin Panel</div>
+      <div class="pt-sub">Contract deployer controls — Paytm platform administrator only.</div>
+
+      <!-- ══ MINT POINTS TO USER ══ -->
+      <div class="card" style="background:linear-gradient(135deg,#f0fff8,#fefff0);border:1.5px solid rgba(0,184,122,0.25)">
+        <div class="card-head">
+          <div class="ch-left">
+            <div class="ch-icon" style="background:var(--green-bg)">🎯</div>
+            <div>
+              <div class="ch-title">Mint Points to a User</div>
+              <div class="ch-sub">As brand owner, send points to any wallet address</div>
+            </div>
+          </div>
+          <span class="bdg bon">● Brand Owner Action</span>
+        </div>
+        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;background:var(--green-bg);border:1px solid rgba(0,184,122,0.2);border-radius:8px;padding:12px 14px;line-height:1.75">
+          Connect with your <strong>brand owner wallet</strong>, paste the user's address, and mint points directly on-chain.
+        </p>
+        <div class="r2">
+          <div class="fg"><label>Brand ID</label><input id="am-bid" type="number" placeholder="1 (e.g. Paytm = 1)" min="1"/></div>
+          <div class="fg"><label>User Wallet Address</label><input id="am-addr" placeholder="0x… paste user's MetaMask address"/></div>
+        </div>
+        <div class="r2">
+          <div class="fg"><label>Points to Mint</label><input id="am-amt" type="number" placeholder="1000" min="1" oninput="updateInrPreview('am-amt','am-inr-preview')"/></div>
+          <div class="fg"><label>Validity in Days <span style="color:var(--ink3);font-weight:400">(0 = never expires)</span></label><input id="am-days" type="number" placeholder="0" min="0" value="0"/></div>
+        </div>
+        <div id="am-inr-preview" style="font-family:var(--mono);font-size:12px;color:var(--green);margin-bottom:12px;display:none"></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn bg" onclick="adminMintPoints()">🎯 Mint Points to User</button>
+          <button class="btn bo bsm" onclick="pasteMyAddress()">📋 Use My Own Address</button>
+        </div>
+        <div id="am-result" style="margin-top:14px"></div>
+      </div>
+      <!-- ══ END MINT ══ -->
+
+      <div class="card">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">⚙</div><div><div class="ch-title">Set Swap Rate Between Brands</div><div class="ch-sub">Only callable by the contract deployer (you)</div></div></div></div>
+        <p style="font-size:13px;color:var(--ink2);margin-bottom:18px;background:#f8f9fc;border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.75">
+          Rate = points received per 100 source points.<br/>
+          e.g. rate = <strong>80</strong> means 100 Paytm pts → <strong style="color:var(--primary)">80 Nykaa pts</strong>
+        </p>
+        <div class="r3">
+          <div class="fg"><label>From Brand ID</label><input id="a-from" type="number" placeholder="1" min="1"/></div>
+          <div class="fg"><label>To Brand ID</label><input id="a-to" type="number" placeholder="2" min="1"/></div>
+          <div class="fg"><label>Rate (per 100 pts)</label><input id="a-rate" type="number" placeholder="80" min="1" max="200"/></div>
+        </div>
+        <button class="btn bp" onclick="setRate()">Set Rate On-Chain</button>
+      </div>
+
+      <div class="card" style="background:linear-gradient(135deg,#f0f4ff,#f8f9ff);border-color:rgba(36,85,245,0.12)">
+        <div class="card-head"><div class="ch-left"><div class="ch-icon">🔍</div><div><div class="ch-title">Contract Information</div></div></div></div>
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;font-weight:600;color:var(--ink2)">Contract Address</span><span id="info-contract" style="font-family:var(--mono);font-size:12px;color:var(--primary)">Not deployed</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span style="font-size:12px;font-weight:600;color:var(--ink2)">Connected Wallet</span><span id="info-wallet" style="font-family:var(--mono);font-size:12px;color:var(--ink2)">—</span></div>
+          <div style="display:flex;justify-content:space-between;padding:12px 0"><span style="font-size:12px;font-weight:600;color:var(--ink2)">Network</span><span style="font-family:var(--mono);font-size:12px;color:var(--green)">Sepolia — Chain ID: 11155111</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LOGS ── -->
+    <div class="pg" id="p-logs">
+      <div class="pt-tag">Transparency</div>
+      <div class="pt-h">Activity Log</div>
+      <div class="pt-sub">All blockchain transactions — click any hash to view on Etherscan.</div>
+      <div class="card">
+        <div class="loglist" id="loglist"><div class="empty"><div class="empty-icon">📋</div><div class="empty-text">No activity yet</div></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BRAND PICKER MODAL -->
+<div class="modal-overlay hidden" id="picker-modal">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" onclick="closePicker()">✕</button>
+    <div style="font-family:var(--display);font-weight:800;font-size:18px;margin-bottom:16px">Select Brand</div>
+    <div class="brands-grid" id="picker-grid" style="grid-template-columns:repeat(3,1fr)"></div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav"><div class="mobile-nav-items"><div class="mn-item on" id="mn-dashboard" onclick="go('dashboard')"><span class="mn-ic">▣</span>Home</div><div class="mn-item" id="mn-brands" onclick="go('brands')"><span class="mn-ic">⬡</span>Brands</div><div class="mn-item" id="mn-earn" onclick="go('earn')"><span class="mn-ic">✦</span>Earn</div><div class="mn-item" id="mn-swap" onclick="go('swap')"><span class="mn-ic">⇌</span>Swap</div><div class="mn-item" id="mn-admin" onclick="go('admin')"><span class="mn-ic">⚙</span>Admin</div><div class="mn-item" id="mn-logs" onclick="go('logs')"><span class="mn-ic">≡</span>Logs</div></div></div>
+
+<div id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<script>
+// ════════════════════════════════
+//  CONFIG — paste your deployed address
+// ════════════════════════════════
+const ADDR = "0xE9F33F6C5CD29F3315177A38f82c3799bCce0400"; // ← already set!
+
+const ABI=[
+  "function registerBrand(string calldata name) external returns (uint256)",
+  "function earnPoints(address user, uint256 brandId, uint256 amount, uint256 validDays) external",
+  "function redeemPoints(uint256 brandId, uint256 amount) external",
+  "function swapPoints(uint256 fromBrandId, uint256 toBrandId, uint256 amountIn) external",
+  "function setSwapRate(uint256 fromBrandId, uint256 toBrandId, uint256 rate) external",
+  "function getPoints(address user, uint256 brandId) external view returns (uint256)",
+  "function getBrand(uint256 brandId) external view returns (string memory, address, bool, uint256)",
+  "function previewSwap(uint256 fromBrandId, uint256 toBrandId, uint256 amountIn) external view returns (uint256 amountOut, uint256 rate)",
+  "function brandCount() external view returns (uint256)"
+];
+
+// Brand visual config — colors & emojis for well-known brands
+const BRAND_STYLE = {
+  "paytm":    {color:"#002970", emoji:"💳"},
+  "swiggy":   {color:"#fc8019", emoji:"🛵"},
+  "zomato":   {color:"#e23744", emoji:"🍕"},
+  "amazon":   {color:"#ff9900", emoji:"📦"},
+  "nykaa":    {color:"#fc2779", emoji:"💄"},
+  "myntra":   {color:"#ff3f6c", emoji:"👗"},
+  "flipkart": {color:"#2874f0", emoji:"🛒"},
+  "meesho":   {color:"#9c27b0", emoji:"🛍️"},
+  "default":  {color:"#2455f5", emoji:"⭐"},
+};
+
+function getBrandStyle(name="") {
+  const k = name.toLowerCase().trim();
+  return BRAND_STYLE[k] || BRAND_STYLE.default;
+}
+
+let provider,signer,contract,account;
+let allBrands = []; // [{id, name, owner, active}]
+let selectedEarnBrand = null;
+let selectedRedeemBrand = null;
+let swapFromBrand = null;
+let swapToBrand = null;
+let pickerTarget = null; // 'from' or 'to'
+
+const INR_PER_POINT = 1; // 1 point = ₹1 for demo
+
+const PAGES = {dashboard:"Dashboard",brands:"Brands",earn:"Earn Points",redeem:"Redeem Points",swap:"Swap Points",admin:"Admin",logs:"Activity Log"};
+
+// ── NAV ──
+function go(id) {
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.mn-item').forEach(n=>n.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(n=>{if(n.getAttribute('onclick')?.includes(`'${id}'`))n.classList.add('on')});
+  const mnEl=document.getElementById('mn-'+id);if(mnEl)mnEl.classList.add('on');
+  document.getElementById('tb-title').textContent = PAGES[id]||id;
+  if(id==='dashboard') loadPoints();
+  if(id==='brands'||id==='earn'||id==='redeem'||id==='swap') loadBrands();
+  window.scrollTo(0,0);
+}
+
+// ── WALLET ──
+document.getElementById('btn-connect').onclick = async()=>{
+  if(!window.ethereum){toast('MetaMask not found — install from metamask.io','err');return}
+  try{
+    provider=new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send('eth_requestAccounts',[]);
+    signer=provider.getSigner(); account=await signer.getAddress();
+    contract=new ethers.Contract(ADDR,ABI,signer);
+    const b=document.getElementById('btn-connect');
+    b.textContent='✓ Connected'; b.classList.add('linked');
+    document.getElementById('w-short').textContent=sh(account);
+    document.getElementById('wdot').classList.add('on');
+    document.getElementById('st-addr').textContent=sh(account);
+    document.getElementById('info-wallet').textContent=account;
+    document.getElementById('info-contract').textContent=ADDR;
+    toast('Wallet connected: '+sh(account),'ok');
+    log('brand','Wallet connected — '+account,'');
+    await loadBrands(); await loadPoints();
+  }catch(e){toast(er(e),'err')}
+};
+
+// ── LOAD BRANDS ──
+async function loadBrands() {
+  if(!contract) return;
+  try{
+    const c=(await contract.brandCount()).toNumber();
+    document.getElementById('st-brands').textContent=c;
+    allBrands=[];
+    for(let i=1;i<=c;i++){
+      const[name,owner,active]=await contract.getBrand(i);
+      allBrands.push({id:i,name,owner,active});
+    }
+    renderBrandGrid('brands-grid', null, null);
+    renderBrandGrid('earn-brands-grid', selectedEarnBrand, (b)=>{selectedEarnBrand=b; renderBrandGrid('earn-brands-grid',selectedEarnBrand,arguments.callee)});
+    renderBrandGrid('redeem-brands-grid', selectedRedeemBrand, (b)=>{selectedRedeemBrand=b; renderBrandGrid('redeem-brands-grid',selectedRedeemBrand,arguments.callee)});
+  }catch(e){console.error(e)}
+}
+
+function renderBrandGrid(containerId, selected, onSelect) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  if(!allBrands.length){el.innerHTML='<div style="grid-column:1/-1;color:var(--ink3);font-size:13px;padding:8px 0">No brands registered yet.</div>';return}
+  el.innerHTML = allBrands.map(b=>{
+    const s = getBrandStyle(b.name);
+    const isSel = selected && selected.id===b.id;
+    return `<div class="brand-card ${isSel?'selected':''}" onclick="${onSelect?`selectBrand('${containerId}',${b.id})`:''}">
+      <div class="brand-logo" style="background:${s.color}">${s.emoji}</div>
+      <div class="brand-name">${x(b.name)}</div>
+      <div class="brand-pts bid bdg" style="margin-top:4px">#${b.id}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectBrand(containerId, brandId) {
+  const b = allBrands.find(b=>b.id===brandId);
+  if(!b) return;
+  if(containerId==='earn-brands-grid') {
+    selectedEarnBrand=b;
+    renderBrandGrid('earn-brands-grid',selectedEarnBrand,(nb)=>{selectedEarnBrand=nb;renderBrandGrid('earn-brands-grid',selectedEarnBrand,arguments.callee)});
+  } else if(containerId==='redeem-brands-grid') {
+    selectedRedeemBrand=b;
+    renderBrandGrid('redeem-brands-grid',selectedRedeemBrand,(nb)=>{selectedRedeemBrand=nb;renderBrandGrid('redeem-brands-grid',selectedRedeemBrand,arguments.callee)});
+  }
+}
+
+// ── LOAD POINTS ──
+async function loadPoints() {
+  if(!contract||!account) return;
+  try{
+    const c=(await contract.brandCount()).toNumber();
+    document.getElementById('st-brands').textContent=c;
+    const tbody=document.getElementById('dash-body');
+    if(!c){tbody.innerHTML='<tr><td colspan="5"><div class="empty"><div class="empty-icon">✦</div><div class="empty-text">No brands yet</div></div></td></tr>';return}
+    let rows='';
+    for(let i=1;i<=c;i++){
+      const[name,,active]=await contract.getBrand(i);
+      const bal=await contract.getPoints(account,i);
+      const s=getBrandStyle(name);
+      const inr=(bal.toNumber()*INR_PER_POINT).toFixed(2);
+      rows+=`<tr>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:${s.color};display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff">${s.emoji}</div>
+          <span style="font-weight:600">${x(name)}</span>
+        </div></td>
+        <td><div class="pts-val">${bal.toString()}</div><div class="pts-inr">≈ ₹${inr}</div></td>
+        <td style="font-weight:600;color:var(--green)">₹${inr}</td>
+        <td class="mono-txt">—</td>
+        <td><span class="bdg ${active?'bon':'boff'}">${active?'● Active':'○ Inactive'}</span></td>
+      </tr>`;
+    }
+    tbody.innerHTML=rows;
+  }catch(e){console.error(e)}
+}
+
+// ── EARN ──
+async function earnPts(){
+  if(!chk()) return;
+  if(!selectedEarnBrand){toast('Select a brand first','err');return}
+  const u=document.getElementById('e-user').value.trim();
+  const a=document.getElementById('e-amt').value;
+  const d=document.getElementById('e-days').value||0;
+  if(!u||!a){toast('Fill all fields','err');return}
+  try{
+    toast('Minting points on-chain…','inf');
+    const tx=await contract.earnPoints(u,selectedEarnBrand.id,a,d);
+    const receipt=await tx.wait();
+    showReceipt({title:'Points Minted!',sub:`${a} ${selectedEarnBrand.name} points sent to customer`,from:account,to:u,hash:receipt.transactionHash,action:'earnPoints()',points:`+${a} ${selectedEarnBrand.name} Points`,worth:`₹${(a*INR_PER_POINT).toFixed(2)}`});
+    log('earn',`Earned ${a} ${selectedEarnBrand.name} pts → ${sh(u)}`,receipt.transactionHash);
+  }catch(e){toast(er(e),'err')}
+}
+
+// ── REDEEM ──
+async function redeemPts(){
+  if(!chk()) return;
+  if(!selectedRedeemBrand){toast('Select a brand first','err');return}
+  const a=document.getElementById('r-amt').value;
+  if(!a){toast('Enter amount','err');return}
+  try{
+    toast('Redeeming points…','inf');
+    const tx=await contract.redeemPoints(selectedRedeemBrand.id,a);
+    const receipt=await tx.wait();
+    showReceipt({title:'Points Redeemed!',sub:`${a} ${selectedRedeemBrand.name} points burned successfully`,from:account,to:ADDR,hash:receipt.transactionHash,action:'redeemPoints()',points:`-${a} ${selectedRedeemBrand.name} Points`,worth:`₹${(a*INR_PER_POINT).toFixed(2)}`});
+    log('redeem',`Redeemed ${a} ${selectedRedeemBrand.name} pts`,receipt.transactionHash);
+  }catch(e){toast(er(e),'err')}
+}
+
+// ── SWAP ──
+async function swapPts(){
+  if(!chk()) return;
+  if(!swapFromBrand||!swapToBrand){toast('Select both brands','err');return}
+  const a=document.getElementById('s-amt').value;
+  if(!a){toast('Enter amount','err');return}
+  try{
+    toast('Executing swap on blockchain…','inf');
+    const tx=await contract.swapPoints(swapFromBrand.id,swapToBrand.id,a);
+    const receipt=await tx.wait();
+    const outEl=document.getElementById('s-out-big');
+    const outAmt=outEl.textContent||'?';
+    showReceipt({title:'Swap Successful!',sub:`${swapFromBrand.name} points exchanged for ${swapToBrand.name} points`,from:account,to:ADDR,hash:receipt.transactionHash,action:'swapPoints()',points:`${a} ${swapFromBrand.name} → ${outAmt} ${swapToBrand.name}`,worth:`₹${(a*INR_PER_POINT).toFixed(2)}`});
+    log('swap',`Swapped ${a} ${swapFromBrand.name} → ${swapToBrand.name}`,receipt.transactionHash);
+  }catch(e){toast(er(e),'err')}
+}
+
+// ── SET RATE ──
+async function setRate(){
+  if(!chk()) return;
+  const f=document.getElementById('a-from').value,t=document.getElementById('a-to').value,r=document.getElementById('a-rate').value;
+  if(!f||!t||!r){toast('Fill all fields','err');return}
+  try{
+    toast('Setting rate on-chain…','inf');
+    const tx=await contract.setSwapRate(f,t,r);
+    const receipt=await tx.wait();
+    showReceipt({title:'Rate Set!',sub:`Swap rate configured between Brand #${f} and Brand #${t}`,from:account,to:ADDR,hash:receipt.transactionHash,action:'setSwapRate()',points:`Brand #${f} → Brand #${t} @ ${r}%`,worth:'Platform admin action'});
+    log('brand',`Swap rate: Brand #${f} → Brand #${t} @ ${r}%`,receipt.transactionHash);
+  }catch(e){toast(er(e),'err')}
+}
+
+async function regBrand(){
+  if(!chk()) return;
+  const n=document.getElementById('bn').value.trim();
+  if(!n){toast('Enter brand name','err');return}
+  try{
+    toast('Registering brand on-chain…','inf');
+    const tx=await contract.registerBrand(n);
+    const receipt=await tx.wait();
+    showReceipt({title:'Brand Registered!',sub:`"${n}" is now live on the LoyaltyChain network`,from:account,to:ADDR,hash:receipt.transactionHash,action:'registerBrand()',points:`Brand: ${n}`,worth:'Network participant'});
+    log('brand',`Brand "${n}" registered`,receipt.transactionHash);
+    document.getElementById('bn').value='';
+    loadBrands();
+  }catch(e){toast(er(e),'err')}
+}
+
+async function checkBal(){
+  if(!chk()) return;
+  if(!selectedRedeemBrand){toast('Select a brand first','err');return}
+  try{
+    const bal=await contract.getPoints(account,selectedRedeemBrand.id);
+    const inr=(bal.toNumber()*INR_PER_POINT).toFixed(2);
+    document.getElementById('r-bal-txt').innerHTML=
+      `<div style="background:var(--primary-light);border:1px solid rgba(36,85,245,0.2);border-radius:8px;padding:12px 16px;display:inline-flex;align-items:center;gap:12px">
+        <span style="font-size:20px">${getBrandStyle(selectedRedeemBrand.name).emoji}</span>
+        <div><strong style="color:var(--ink)">${selectedRedeemBrand.name}</strong><br/>
+        <span style="font-family:var(--mono);color:var(--primary)">${bal.toString()} points</span>
+        <span style="color:var(--green);font-family:var(--mono);margin-left:10px">≈ ₹${inr}</span></div>
+      </div>`;
+  }catch(e){toast(er(e),'err')}
+}
+
+// ── SWAP PREVIEW ──
+async function prevSwap(){
+  if(!contract||!swapFromBrand||!swapToBrand) return;
+  const a=document.getElementById('s-amt').value;
+  if(!a){document.getElementById('s-out-big').textContent='0';document.getElementById('s-to-inr').textContent='≈ ₹0.00';return}
+  document.getElementById('s-from-inr').textContent=`≈ ₹${(a*INR_PER_POINT).toFixed(2)}`;
+  try{
+    const[out,rate]=await contract.previewSwap(swapFromBrand.id,swapToBrand.id,a);
+    document.getElementById('s-out-big').textContent=out.toString();
+    document.getElementById('s-to-inr').textContent=`≈ ₹${(out.toNumber()*INR_PER_POINT).toFixed(2)}`;
+    document.getElementById('swap-rate-display').textContent=`${rate.toString()}% — ${a} ${swapFromBrand.name} pts → ${out.toString()} ${swapToBrand.name} pts`;
+  }catch(_){document.getElementById('swap-rate-display').textContent='No swap route set. Admin must set rate first.'}
+}
+
+// ── BRAND PICKER FOR SWAP ──
+function openBrandPicker(target){
+  pickerTarget=target;
+  const grid=document.getElementById('picker-grid');
+  grid.innerHTML=allBrands.map(b=>{
+    const s=getBrandStyle(b.name);
+    return `<div class="brand-card" onclick="pickBrand(${b.id})" style="cursor:pointer">
+      <div class="brand-logo" style="background:${s.color}">${s.emoji}</div>
+      <div class="brand-name">${x(b.name)}</div>
+      <div class="bdg bid" style="margin-top:4px">#${b.id}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('picker-modal').classList.remove('hidden');
+}
+
+function pickBrand(id){
+  const b=allBrands.find(b=>b.id===id);
+  if(!b) return;
+  const s=getBrandStyle(b.name);
+  if(pickerTarget==='from'){
+    swapFromBrand=b;
+    document.getElementById('sfrom-logo').textContent=s.emoji;
+    document.getElementById('sfrom-logo').style.background=s.color;
+    document.getElementById('sfrom-name').textContent=b.name;
+    document.getElementById('sfrom-id').textContent='Brand #'+b.id;
+  } else {
+    swapToBrand=b;
+    document.getElementById('sto-logo').textContent=s.emoji;
+    document.getElementById('sto-logo').style.background=s.color;
+    document.getElementById('sto-name').textContent=b.name;
+    document.getElementById('sto-id').textContent='Brand #'+b.id;
+  }
+  closePicker();
+  prevSwap();
+}
+
+function closePicker(){document.getElementById('picker-modal').classList.add('hidden')}
+
+function flipSwap(){
+  const tmp=swapFromBrand; swapFromBrand=swapToBrand; swapToBrand=tmp;
+  if(swapFromBrand){
+    const s=getBrandStyle(swapFromBrand.name);
+    document.getElementById('sfrom-logo').textContent=s.emoji;
+    document.getElementById('sfrom-logo').style.background=s.color;
+    document.getElementById('sfrom-name').textContent=swapFromBrand.name;
+    document.getElementById('sfrom-id').textContent='Brand #'+swapFromBrand.id;
+  } else {
+    document.getElementById('sfrom-logo').textContent='?';
+    document.getElementById('sfrom-logo').style.background='#e3e8f4';
+    document.getElementById('sfrom-name').textContent='Select Brand';
+    document.getElementById('sfrom-id').textContent='Click to choose';
+  }
+  if(swapToBrand){
+    const s=getBrandStyle(swapToBrand.name);
+    document.getElementById('sto-logo').textContent=s.emoji;
+    document.getElementById('sto-logo').style.background=s.color;
+    document.getElementById('sto-name').textContent=swapToBrand.name;
+    document.getElementById('sto-id').textContent='Brand #'+swapToBrand.id;
+  } else {
+    document.getElementById('sto-logo').textContent='?';
+    document.getElementById('sto-logo').style.background='#e3e8f4';
+    document.getElementById('sto-name').textContent='Select Brand';
+    document.getElementById('sto-id').textContent='Click to choose';
+  }
+  prevSwap();
+}
+
+function updateInrPreview(inputId, previewId){
+  const val=document.getElementById(inputId).value;
+  const el=document.getElementById(previewId);
+  if(val&&val>0){el.style.display='block';el.textContent=`≈ ₹${(val*INR_PER_POINT).toFixed(2)} worth of points`}
+  else{el.style.display='none'}
+}
+
+// ── TX RECEIPT MODAL ──
+function showReceipt({title,sub,from,to,hash,action,points,worth}){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-sub').textContent=sub;
+  document.getElementById('modal-from').textContent=sh(from);
+  document.getElementById('modal-to').textContent=sh(to);
+  document.getElementById('modal-hash').textContent=sh(hash,12);
+  document.getElementById('modal-action').textContent=action;
+  document.getElementById('modal-points').textContent=points;
+  document.getElementById('modal-worth').textContent=worth;
+  document.getElementById('etherscan-link').href=`https://sepolia.etherscan.io/tx/${hash}`;
+  document.getElementById('tx-modal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('tx-modal').classList.add('hidden')}
+
+// ── HELPERS ──
+function chk(){if(!contract){toast('Connect MetaMask wallet first','err');return false}return true}
+function sh(a,chars=4){if(!a)return'—';const c=chars;return a.slice(0,c+2)+'…'+a.slice(-c)}
+function x(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function er(e){const m=e?.reason||e?.data?.message||e?.message||'Transaction failed';return m.length>80?m.slice(0,80)+'…':m}
+
+function toast(msg,type='inf'){
+  const w=document.getElementById('toasts'),t=document.createElement('div');
+  t.className=`toast t${type}`;
+  t.innerHTML=`<span style="font-size:14px">${{ok:'✓',err:'✕',inf:'◆'}[type]||'◆'}</span><span>${msg}</span>`;
+  w.appendChild(t);setTimeout(()=>t.style.opacity='0',3500);setTimeout(()=>t.remove(),4000);
+}
+
+// ── ADMIN MINT ──
+async function adminMintPoints(){
+  if(!chk()) return;
+  const b=document.getElementById('am-bid').value.trim();
+  const u=document.getElementById('am-addr').value.trim();
+  const a=document.getElementById('am-amt').value.trim();
+  const d=document.getElementById('am-days').value||0;
+  if(!b||!u||!a){toast('Fill all fields — Brand ID, address and amount','err');return}
+  if(!ethers.utils.isAddress(u)){toast('Invalid wallet address','err');return}
+  try{
+    toast('Minting points to user…','inf');
+    const tx=await contract.earnPoints(u,b,a,d);
+    const receipt=await tx.wait();
+    showReceipt({title:'Points Minted!',sub:`${a} points sent to user's wallet`,from:account,to:u,hash:receipt.transactionHash,action:'earnPoints()',points:`+${a} pts (Brand #${b})`,worth:`₹${(a*INR_PER_POINT).toFixed(2)}`});
+    log('earn',`Admin minted ${a} pts (Brand #${b}) → ${sh(u)}`,receipt.transactionHash);
+    document.getElementById('am-result').innerHTML=
+      `<div style="background:var(--green-bg);border:1px solid rgba(0,184,122,0.25);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--green);font-weight:600">✓ ${a} points minted to ${u.slice(0,6)}…${u.slice(-4)} — user can now connect and see their balance</div>`;
+  }catch(e){
+    toast(er(e),'err');
+    document.getElementById('am-result').innerHTML=
+      `<div style="background:var(--red-bg);border:1px solid rgba(240,62,62,0.2);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--red)">✕ ${er(e)}</div>`;
+  }
+}
+function pasteMyAddress(){
+  if(!account){toast('Connect wallet first','err');return}
+  document.getElementById('am-addr').value=account;
+  toast('Your address pasted ✓','ok');
+}
+
+function log(type,text,hash){
+  const cls={earn:'le',redeem:'lr',swap:'ls',brand:'lb'}[type]||'lb';
+  const l=document.getElementById('loglist');
+  if(l.querySelector('.empty'))l.innerHTML='';
+  const txLink=hash?`<a class="ltx" href="https://sepolia.etherscan.io/tx/${hash}" target="_blank">${sh(hash,6)} ↗</a>`:'';
+  l.insertAdjacentHTML('afterbegin',`<div class="logitem"><span class="ldot ${cls}"></span><span style="color:var(--ink)">${text}</span>${txLink}<span class="ltime">${new Date().toLocaleTimeString()}</span></div>`);
+}
+</script>
+</body>
+</html>
